@@ -1,4 +1,4 @@
-﻿// 10 Вариант. 
+// 10 Вариант. 
 // Объект исследования: Растения.
 // Примеры классов: Дерево (tree), Кустарник (flower / цветы), Кактус (cactus)
 // Общие параметры: Название.
@@ -26,18 +26,18 @@ private:
 
 public:
 	
-	plants() { name = ""; }
+	plants() : name("") {}
 
-	plants(string new_name) { this->name = new_name; }
+	explicit plants(string const& new_name) : name(new_name) {}
 
-	string get_name() { return this->name; }
+	string get_name() const { return this->name; }
 
-	void change_name(string new_name) { this->name = new_name; }
+	void change_name(string const& new_name) { this->name = new_name; }
 	
 	virtual void print_plant() {};
 	virtual string get_type() { return "plant"; };
 
-	virtual ~plants() {} // Виртуальный деструктор
+	virtual ~plants() = default; // Виртуальный деструктор
 };
 
 class tree : public plants {
@@ -48,25 +48,25 @@ public:
 
 	tree() { this->age = 0; }
 
-	tree(string new_name) { this->change_name(new_name); }
+	explicit tree(string const& new_name) { this->change_name(new_name); this->age = 0; }
 
-	tree(long int new_age) { this->age = new_age; }
+	explicit tree(long int new_age) { this->age = new_age; }
 
-	tree(string new_name, long int new_age) {
+	tree(string const& new_name, long int new_age) {
 		this->change_name(new_name);
 		this->age = new_age;
 	}
 
-	long int get_age() { return this->age; };
+	long int get_age() const { return this->age; };
 
 	void change_age(long int new_age) { this->age = new_age; }
 
-	void print_plant() {
+	void print_plant() override {
 		cout << "Tree: \t\t" << this->get_name() << endl;
 		cout << "Age:  \t\t\t" << this->get_age() << endl;
 	}
 
-	string get_type() { return "tree"; };
+	string get_type() final { return "tree"; };
 };
 
 class flower : public plants {
@@ -75,24 +75,24 @@ private:
 
 public:
 
-	flower() {}
+	flower() = default;
 
-	flower(string new_name) { this->change_name(new_name); }
+	explicit flower(string const& new_name) { this->change_name(new_name); }
 
-	flower(vector<int> new_dates) { this->months = new_dates; }
+	explicit flower(vector<int> const& new_dates) { this->months = new_dates; }
 
-	flower(string new_name, vector<int> new_dates) {
+	flower(string const& new_name, vector<int> const& new_dates) {
 		this->change_name(new_name);
 		this->months = new_dates;
 	}
 
-	vector<int> get_months() { return this->months; };
+	vector<int> get_months() const { return this->months; };
 
-	void change_months(vector<int> new_dates) { this->months = new_dates; }
+	void change_months(vector<int> const& new_dates) { this->months = new_dates; }
 
 	void add_date_to_months(int new_date) { this->months.push_back(new_date); }
 
-	void print_plant() {
+	void print_plant() override {
 		const bool vertical = false;	// Вертикальный вывод массива или горизонтальный
 		cout << "flower:\t\t" << this->get_name() << endl;
 		cout << "flowering mounth:" << (vertical ? "\n" : "\t");
@@ -101,7 +101,7 @@ public:
 		cout << endl;
 	}
 
-	string get_type() { return "flower"; };
+	string get_type() final { return "flower"; };
 };
 
 class cactus : public plants {
@@ -112,25 +112,25 @@ public:
 
 	cactus() { this->lenght = 0; }
 
-	cactus(string new_name) { this->change_name(new_name); }
+	explicit cactus(string const& new_name) { this->change_name(new_name); this->lenght = 0; }
 
-	cactus(float new_len) { this->lenght = new_len; }
+	explicit cactus(float new_len) { this->lenght = new_len; }
 
-	cactus(string new_name, float new_len) {
+	cactus(string const& new_name, float new_len) {
 		this->change_name(new_name);
 		this->lenght = new_len;
 	}
 
-	float get_lenght() { return this->lenght; };
+	float get_lenght() const { return this->lenght; };
 
 	void change_lenght(float new_len) { this->lenght = new_len; }
 
-	void print_plant() {
+	void print_plant() override {
 		cout << "Cactus:\t\t" << this->get_name() << endl;
 		cout << "Length: \t\t" << this->get_lenght() << endl;		// не стилизовано
 	}
 
-	string get_type() { return "cactus"; };
+	string get_type() final { return "cactus"; };
 };
 
 void print(vector<plants*> garden) {
@@ -145,7 +145,7 @@ void print(vector<plants*> garden) {
 template <typename T>
 void add_obj(vector<plants*>& garden, T new_plant) {				// добавление объекта в сад
 	if (new_plant.at("type").get<string>() == "tree") {
-		tree* plant = new tree;
+		auto* plant = new tree;
 		plant->change_name(new_plant.at("name").get<string>());
 		plant->change_age(new_plant.at("age").get<long int>());
 		garden.push_back(plant);
@@ -153,7 +153,7 @@ void add_obj(vector<plants*>& garden, T new_plant) {				// добавление 
 	}
 
 	if (new_plant.at("type").get<string>() == "flower") {
-		flower* plant = new flower;
+		auto* plant = new flower;
 		plant->change_name(new_plant.at("name").get<string>());
 		plant->change_months(new_plant.at("mounths"));
 		garden.push_back(plant);
@@ -161,7 +161,7 @@ void add_obj(vector<plants*>& garden, T new_plant) {				// добавление 
 	}
 
 	if (new_plant.at("type").get<string>() == "cactus") {
-		cactus* plant = new cactus;
+		auto* plant = new cactus;
 		plant->change_name(new_plant.at("name").get<string>());
 		plant->change_lenght(new_plant.at("lenght").get<float>());
 		garden.push_back(plant);
@@ -184,7 +184,6 @@ int main()
 
 	vector<plants*> garden;
 
-	//json data = json::parse(file);
 	json data;
 	file >> data;
 
@@ -195,8 +194,6 @@ int main()
 	bool exit = false;
 
 	while (!exit) {
-		//cin.clear();
-		//cin.ignore(314159265, '\n');
 
 		cout << endl;
 		cout << "1. Добавить объект." << endl;
@@ -217,7 +214,7 @@ int main()
 			cin >> new_type;
 
 			if (new_type == "tree") {
-				tree* plant = new tree;
+				auto* plant = new tree;
 				cout << "Введите название дерева: ";
 				string str_buffer;
 				cin >> str_buffer;
@@ -245,7 +242,7 @@ int main()
 				cout << "Дерево успешно добавлено." << endl;
 			}																			// добавление дерева
 			else if (new_type == "cactus") {
-				cactus* plant = new cactus;
+				auto* plant = new cactus;
 				cout << "Введите имя кактуса: ";
 				string str_buffer;
 				cin >> str_buffer;
@@ -274,7 +271,7 @@ int main()
 				cout << "Кактус успешно добавлен." << endl;
 			}																				// добавление кактуса
 			else if (new_type == "flower") {
-				flower* plant = new flower;
+				auto* plant = new flower;
 				cout << "Введите имя цветка: ";
 				string str_buffer;
 				cin >> str_buffer;
@@ -366,7 +363,7 @@ int main()
 						int count_del = 0;			// счетчик кол-ва элементов, которые нужно будет удалить
 
 						for (int i = 0; i < garden.size() - count_del; i++) {	// смотрим на все элементы, не считая тех, что были перемещены в конец списка на удаление
-							if (tree* t = dynamic_cast<tree*>(garden[i])) {		// пытаемся создать элемент с классом tree, если успешно, то идем дальше
+							if (auto* t = dynamic_cast<tree*>(garden[i])) {		// пытаемся создать элемент с классом tree, если успешно, то идем дальше
 								if (t->get_type() == "tree") {					// предположительно это излишняя проверка.
 									rotate(garden.begin() + i, garden.begin() + i + 1, garden.end());	// перемещаем в конец списка элемент, который подлежит удалению
 									fixed_del = true;
@@ -397,7 +394,7 @@ int main()
 					int count_del = 0;
 
 					for (int i = 0; i < garden.size() - count_del; i++) {
-						if (tree* t = dynamic_cast<tree*>(garden[i])) {
+						if (auto* t = dynamic_cast<tree*>(garden[i])) {
 							if (t->get_name() == choose) {
 								rotate(garden.begin() + i, garden.begin() + i + 1, garden.end());
 								fixed_del = true;
@@ -436,7 +433,7 @@ int main()
 					int count_del = 0;
 
 					for (int i = 0; i < garden.size() - count_del; i++) {
-						if (tree* t = dynamic_cast<tree*>(garden[i])) {
+						if (auto* t = dynamic_cast<tree*>(garden[i])) {
 							if (((t->get_age() == choose) && (choose_2 == 1)) ||
 								((t->get_age() <= choose) && (choose_2 == 2)) ||
 								((t->get_age() >= choose) && (choose_2 == 3))) {
@@ -478,7 +475,7 @@ int main()
 						int count_del = 0;
 
 						for (int i = 0; i < garden.size() - count_del; i++) {
-							if (cactus* c = dynamic_cast<cactus*>(garden[i])) {
+							if (auto* c = dynamic_cast<cactus*>(garden[i])) {
 								if (c->get_type() == "cactus") {
 									rotate(garden.begin() + i, garden.begin() + i + 1, garden.end());
 									fixed_del = true;
@@ -510,7 +507,7 @@ int main()
 					int count_del = 0;
 
 					for (int i = 0; i < garden.size() - count_del; i++) {
-						if (cactus* c = dynamic_cast<cactus*>(garden[i])) {
+						if (auto* c = dynamic_cast<cactus*>(garden[i])) {
 							if (c->get_name() == choose) {
 								rotate(garden.begin() + i, garden.begin() + i + 1, garden.end());
 								fixed_del = true;
@@ -549,7 +546,7 @@ int main()
 					int count_del = 0;
 
 					for (int i = 0; i < garden.size() - count_del; i++) {
-						if (cactus* c = dynamic_cast<cactus*>(garden[i])) {
+						if (auto* c = dynamic_cast<cactus*>(garden[i])) {
 							if (((c->get_lenght() == choose) && (choose_2 == 1)) ||
 								((c->get_lenght() <= choose) && (choose_2 == 2)) ||
 								((c->get_lenght() >= choose) && (choose_2 == 3))) {
@@ -591,7 +588,7 @@ int main()
 						int count_del = 0;
 
 						for (int i = 0; i < garden.size() - count_del; i++) {
-							if (flower* f = dynamic_cast<flower*>(garden[i])) {
+							if (auto* f = dynamic_cast<flower*>(garden[i])) {
 								if (f->get_type() == "flower") {
 									rotate(garden.begin() + i, garden.begin() + i + 1, garden.end());
 									fixed_del = true;
@@ -623,7 +620,7 @@ int main()
 					int count_del = 0;
 
 					for (int i = 0; i < garden.size() - count_del; i++) {
-						if (flower* f = dynamic_cast<flower*>(garden[i])) {
+						if (auto* f = dynamic_cast<flower*>(garden[i])) {
 							if (f->get_name() == choose) {
 								rotate(garden.begin() + i, garden.begin() + i + 1, garden.end());
 								fixed_del = true;
@@ -674,7 +671,7 @@ int main()
 					int count_del = 0;
 
 					for (int i = 0; i < garden.size() - count_del; i++) {			// проход по саду
-						if (flower* f = dynamic_cast<flower*>(garden[i])) {			// если цветок, то делаем проверку
+						if (auto f = dynamic_cast<flower*>(garden[i])) {			// если цветок, то делаем проверку
 							bool del_fix = false;
 							for (int j = 0; j < choose.size(); j++) {				// проходим по заданному массиву
 								for (int m = 0; m < f->get_months().size(); m++) {	// проходим по массиву внутри цветка
